@@ -1,0 +1,8 @@
+{
+  "name": "cursus",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "mtg": "node --experimental-strip-types orgai/main.ts"
+  }
+}
