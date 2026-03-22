@@ -1,1 +1,0 @@
-"""orgai Meeting Protocol CLI."""

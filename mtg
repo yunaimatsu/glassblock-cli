@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec python -m orgai.main "$@"
+exec node --experimental-strip-types ./orgai/main.ts "$@"

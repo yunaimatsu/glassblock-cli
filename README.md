@@ -40,3 +40,8 @@ mtg session up
 - Events are immutable append-only records.
 - `session down` commits durable outputs (minutes + extracted docs/tasks).
 - `session up` always reconstructs context and prints visible retrieval logs.
+
+
+## Runtime
+
+- Node.js 22+ (uses `--experimental-strip-types` to run TypeScript directly).
