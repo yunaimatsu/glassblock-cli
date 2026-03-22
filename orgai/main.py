@@ -5,11 +5,21 @@ import os
 import sys
 
 from .commands import ParsedCommand, parse_command
+from .config import OrgaiConfig, load_config
 from .git import commit_minutes, create_branch, current_branch, push_branch
 from .meeting import Meeting, MeetingState
 from .storage import load_session, save_session
 
-END_KEYWORDS = {"end", "done", "終了"}
+
+class Ansi:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    CYAN = "\033[36m"
 
 
 class Ansi:
@@ -24,7 +34,17 @@ class Ansi:
 
 
 class OrgaiApp:
-    def __init__(self, git_enabled: bool = True) -> None:
+    STYLE_TO_ANSI = {
+        "yellow_bold": (Ansi.YELLOW, True),
+        "yellow": (Ansi.YELLOW, False),
+        "blue": (Ansi.BLUE, False),
+        "green": (Ansi.GREEN, False),
+        "red_bold": (Ansi.RED, True),
+        "cyan": (Ansi.CYAN, False),
+        "dim": (Ansi.DIM, False),
+    }
+
+    def __init__(self, git_enabled: bool = True, config: OrgaiConfig | None = None) -> None:
         self.meeting = load_session()
         self.git_enabled = git_enabled
         self.thread_drift_count = 0
@@ -74,7 +94,7 @@ class OrgaiApp:
         if self.meeting is None or self.meeting.state == MeetingState.IDLE:
             return "No active meeting. Start one with /start <topic>."
 
-        if self.meeting.state == MeetingState.RUNNING and text.strip().lower() in END_KEYWORDS:
+        if self.meeting.state == MeetingState.RUNNING and text.strip().lower() in self.config.end_keywords:
             return self._cmd_end("")
 
         if self.meeting.state != MeetingState.RUNNING:
@@ -261,12 +281,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable git branch/commit/push operations (useful for local dry runs).",
     )
+    parser.add_argument(
+        "--config",
+        default="orgai.toml",
+        help="Path to TOML configuration file (default: orgai.toml).",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    OrgaiApp(git_enabled=not args.no_git).run()
+    config = load_config(Path(args.config))
+    OrgaiApp(git_enabled=not args.no_git, config=config).run()
 
 
 if __name__ == "__main__":
